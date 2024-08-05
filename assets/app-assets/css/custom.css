@@ -1,0 +1,65 @@
+.header-navbar .navbar-header .navbar-brand .brand-logo {
+    vertical-align: sub;
+    width: 40%;
+}
+.main-menu.menu-native-scroll .main-menu-content {
+    overflow-y: scroll;
+    background-color: white;
+}
+.main-menu.menu-dark .navigation {
+    background: #fefefe;
+}
+.main-menu.menu-dark .navigation .navigation-header {
+    color: #000000;
+    padding: 24px 20px 8px;
+    
+}
+.main-menu.menu-dark .navigation>li>ul, .main-menu.menu-dark ul.menu-popout {
+    background: #f2f2f2;
+}
+.main-menu.menu-dark .navigation>li.open ul li.active>a, .main-menu.menu-dark .navigation>li.open ul li>a {
+    padding-left: 50px;
+    color: black;
+}
+.main-menu.menu-dark .navigation>li.open>a {
+    padding-left: 16px!important;
+    color: #000000;
+    background: #ffffff;
+}
+.main-menu.menu-dark .navigation li a {
+    color: #000000;
+}
+body.vertical-layout.vertical-menu.menu-expanded .navbar .navbar-header {
+    float: left;
+    background-color: white;
+    width: 240px;
+}
+.form-body{
+    width:100%
+    
+}
+form.form {
+    display: block;
+}
+.main-menu.menu-dark {
+    color: #DCDCDC;
+    background: #ffffff;
+}
+
+
+.navigation-main .nav-item:hover{
+    background-color: #f6aa74;
+}
+.main-menu.menu-dark .navigation>li.active>a, .main-menu.menu-dark .navigation>li.hover>a, .main-menu.menu-dark .navigation>li:hover>a {
+    color: #000000;
+    background-color: #f6aa74;
+}
+.main-menu.menu-dark .navigation>li.open ul li.active>a, .main-menu.menu-dark .navigation>li.open ul li>a:horizontal {
+    padding-left: 50px;
+    background-color: #2879b3;
+    color: #140f0f;
+}
+
+.no_pd{
+    padding: 19px 14px !important;
+}

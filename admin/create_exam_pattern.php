@@ -1,24 +1,22 @@
-<?php include "../common/header.php"; ?>
-
-<?php
+<?php include "../common/header.php";
 include "db.php";
 
 $conn = mysqli_connect($servername, $username, $password, $dbname);
+
 // Check connection
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
-function createSlug($string)
-{
+
+function createSlug($string) {
     $string = strtolower($string); // Convert to lowercase
     $string = preg_replace('/[^a-z0-9\-]/', '', $string); // Remove special characters except alphanumeric and hyphens
     $string = preg_replace('/-+/', '-', $string); // Replace multiple hyphens with a single hyphen
     $string = trim($string, '-'); // Trim hyphens from the beginning and end
     return $string;
 }
+
 if (isset($_POST['exam_que_save'])) {
-
-
     $org_id = $_REQUEST['org_id'];
     $exam_id = $_REQUEST['exam_id'];
     $class_id = $_REQUEST['class_id'];
@@ -28,39 +26,40 @@ if (isset($_POST['exam_que_save'])) {
     $chapter_id = $_REQUEST['chapter_id'];
     $sub_chapter_id = $_REQUEST['sub_chapter_id'];
 
-
-
-    // $exam_que = $_REQUEST['exam_que'];
-
-    // $opt1 = $_REQUEST['opt1'];
-    // $opt2 = $_REQUEST['opt2'];
-    // $opt3 = $_REQUEST['opt3'];
-    // $opt4 = $_REQUEST['opt4'];
-    // $correct_opt = $_REQUEST['correct_opt'];
-
-    // $marks = $_REQUEST['marks'];
-    // $solution = $_REQUEST['solution'];
-    // $slug = createSlug($degis_title);
-
-
-
-    $sql = "INSERT INTO `exam_question`(`org_id`, `class_id`, `subject_id`, `section_id`, `chapter_id`, `sub_chapter_id` ,`exam_id`, `exam_type`, `status`) 
-    VALUES ('$org_id','$class_id','$subject_id','$section_id','$chapter_id','$sub_chapter_id','$exam_id','$exam_type','1')";
+    $sql = "INSERT INTO `exam_question`(`org_id`, `class_id`, `subject_id`, `section_id`, `chapter_id`, `sub_chapter_id`, `exam_id`, `exam_type`, `status`) 
+            VALUES ('$org_id','$class_id','$subject_id','$section_id','$chapter_id','$sub_chapter_id','$exam_id','$exam_type','1')";
 
     if (mysqli_query($conn, $sql)) {
         $question_id = mysqli_insert_id($conn);
-
-
         $_SESSION['new_question_id'] = $question_id;
 
+        // Handle file upload
+        $uploadDirectory = 'uploads/'; // Directory to store uploaded images
+        foreach ($_FILES['question_images']['tmp_name'] as $key => $tmp_name) {
+            $file_name = basename($_FILES['question_images']['name'][$key]);
+            $file_tmp = $_FILES['question_images']['tmp_name'][$key];
+            $filePath = $uploadDirectory . $file_name;
 
+            // Move the uploaded file to the desired directory
+            if (move_uploaded_file($file_tmp, $filePath)) {
+                // Insert the file path into the question_images table
+                $sql = "INSERT INTO `question_images` (`question_id`, `question_images`) 
+                        VALUES ('$question_id', '$filePath')";
+                if (!mysqli_query($conn, $sql)) {
+                    echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+                }
+            } else {
+                echo "Error uploading file: " . $file_name;
+            }
+        }
 
         echo "<script>alert('Question Created')</script>";
         echo "<script>window.location.replace('next_page.php');</script>";
     } else {
         echo "Error: " . $sql . "<br>" . mysqli_error($conn);
     }
-    // header("location:create_org.php");
+}
+?>
 
 }
 
@@ -232,8 +231,8 @@ if (isset($_POST['exam_que_save'])) {
                                             <div class="row my-5">
                                                 <div class="col-md-12">
                                                 <div id="imagePreviews"></div>
-                                                <input type="file" class="form-control" accept="image/*" multiple onchange="previewImages(event)">
-
+                                                <input type="file" class="form-control" name="question_images[]" id="question_images" accept="image/*" multiple onchange="previewImages(event)">
+                                                <!-- <input type="file" name="question_images[]" multiple onchange="previewImages(event)"> -->
                                                 </div>
                                             </div>
 
@@ -243,7 +242,7 @@ if (isset($_POST['exam_que_save'])) {
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label for="projectinput2">Exam Question</label>
-                                                            <input type="text" id="mcq_ques" class="form-control" placeholder="Exam Question" name="exam_que">
+                                                            <input type="text" id="mcq_ques" name="mcq_ques" class="form-control" placeholder="Exam Question" name="exam_que">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -432,39 +431,80 @@ if (isset($_POST['exam_que_save'])) {
     }
 
 
-    function save_numerical() {
-        var formData = {
-            org_id: $('#org_id').val(),
-            exam_id: $('#exam_id').val(),
-            class_id: $('#class_id').val(),
-            subject_id: $('#subject_id').val(),
-            section_id: $('#section_id').val(),
-            exam_type: $('#exam_type').val(),
-            chapter_id: $('#chapter_id').val(),
-            sub_chapter_id: $('#sub_chapter_id').val(),
-            mcq_ques: $("#exam_que").val(),
-            mcq_correct_opt: $("#correct_opt").val(),
-            mcq_marks: $("#marks").val(),
-            mcq_solution: $("#mcq_solution").val()
-        };
+    // function save_numerical() {
+    //     var formData = {
+    //         org_id: $('#org_id').val(),
+    //         exam_id: $('#exam_id').val(),
+    //         class_id: $('#class_id').val(),
+    //         subject_id: $('#subject_id').val(),
+    //         section_id: $('#section_id').val(),
+    //         exam_type: $('#exam_type').val(),
+    //         chapter_id: $('#chapter_id').val(),
+    //         sub_chapter_id: $('#sub_chapter_id').val(),
+    //         mcq_ques: $("#exam_que").val(),
+    //         mcq_correct_opt: $("#correct_opt").val(),
+    //         mcq_marks: $("#marks").val(),
+    //         mcq_solution: $("#mcq_solution").val()
+    //     };
 
-        $.ajax({
-            type: "POST",
-            url: "ajax/save_mcq_ans.php",
-            data: formData,
-            dataType: "json",
-            success: function(data) {
-                // Populate class select
-                if (data == '1') {
-                    alert("question created successfully");
-                    $("#single_mcq").trigger('reset');
-                } else {
-                    alert("please try again");
-                }
-                // $("#subject_id").html(data.subject);
-            }
-        });
+    //     $.ajax({
+    //         type: "POST",
+    //         url: "ajax/save_mcq_ans.php",
+    //         data: formData,
+    //         dataType: "json",
+    //         success: function(data) {
+    //             // Populate class select
+    //             if (data == '1') {
+    //                 alert("question created successfully");
+    //                 $("#single_mcq").trigger('reset');
+    //             } else {
+    //                 alert("please try again");
+    //             }
+    //             // $("#subject_id").html(data.subject);
+    //         }
+    //     });
+    // }
+
+
+    function save_numerical() {
+    var formData = new FormData();
+    formData.append('org_id', $('#org_id').val());
+    formData.append('exam_id', $('#exam_id').val());
+    formData.append('class_id', $('#class_id').val());
+    formData.append('subject_id', $('#subject_id').val());
+    formData.append('section_id', $('#section_id').val());
+    formData.append('exam_type', $('#exam_type').val());
+    formData.append('chapter_id', $('#chapter_id').val());
+    formData.append('sub_chapter_id', $('#sub_chapter_id').val());
+    formData.append('mcq_ques', $("#exam_que").val());
+    formData.append('mcq_correct_opt', $("#correct_opt").val());
+    formData.append('mcq_marks', $("#marks").val());
+    formData.append('mcq_solution', $("#mcq_solution").val());
+
+    // Append the image files to the formData
+    var files = $('#question_images')[0].files;
+    for (var i = 0; i < files.length; i++) {
+        formData.append('question_images[]', files[i]);
     }
+
+    $.ajax({
+        type: "POST",
+        url: "ajax/save_mcq_ans.php",
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: "json",
+        success: function(data) {
+            if (data == '1') {
+                alert("Question created successfully");
+                $("#single_mcq").trigger('reset');
+            } else {
+                alert("Please try again");
+            }
+        }
+    });
+}
+
 </script>
 <script>
     $(document).ready(function() {
